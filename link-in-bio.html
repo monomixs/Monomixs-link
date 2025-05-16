@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Links</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --sky-blue: #00b7ff;
+            --pink: #ff00d0;
+            --text-color: #000000;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow-color: rgba(0, 0, 0, 0.405);
+            --hover-shadow-color: rgba(0, 0, 0, 0.2);
+            --accent-color-instagram: #000000;
+            --accent-color-youtube: #000000;
+            --accent-color-threads: #000000;
+            --accent-color-github: #000000;
+        }
+
+        html, body { /* MODIFIED: Default overflow, JS will handle it */
+            height: 100%;
+            /* overflow: hidden; REMOVED */
+            margin: 0; /* Body margin reset */
+            padding: 0; /* Body padding reset */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, var(--sky-blue), var(--pink));
+            display: flex; /* Keep this if scroll-wrapper might not be 100% width */
+            flex-direction: column; /* Keep this */
+            align-items: center; /* Keep this */
+            box-sizing: border-box;
+        }
+
+        .scroll-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 30px 20px; /* Original content padding */
+            box-sizing: border-box;
+            will-change: transform;
+        }
+
+        /* ... rest of your existing CSS ... */
+        .profile-container {
+            text-align: center;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+            animation: springIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards;
+        }
+
+        .profile-pic {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 6px 20px var(--shadow-color);
+            margin-bottom: 20px;
+        }
+
+        .profile-name {
+            font-size: 2em;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .links-section {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 18px 25px;
+            border-radius: 16px;
+            box-shadow: 0 5px 12px var(--shadow-color);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        box-shadow 0.3s ease-out,
+                        background-color 0.3s ease-out;
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .link-item:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 10px 25px var(--hover-shadow-color);
+        }
+
+        .link-item:hover .icon-container svg,
+        .link-item:hover .icon-container img {
+            animation: iconWiggle 0.5s ease-in-out;
+        }
+
+        .link-item .icon-container img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .link-item:hover .link-title {
+            color: var(--accent-color, var(--text-color));
+        }
+
+        .link-item.instagram { --accent-color: var(--accent-color-instagram); }
+        .link-item.youtube { --accent-color: var(--accent-color-youtube); }
+        .link-item.threads { --accent-color: var(--accent-color-threads); }
+        .link-item.github { --accent-color: var(--accent-color-github); }
+
+        .link-item:active {
+            transform: scale(0.97) translateY(0px);
+            box-shadow: 0 3px 8px var(--shadow-color);
+            transition-duration: 0.08s;
+        }
+
+        .link-item .icon-container {
+            width: 32px;
+            height: 32px;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .link-item:hover .icon-container {
+             transform: rotate(-5deg) scale(1.1);
+        }
+
+        .link-item svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+            transition: fill 0.3s ease;
+        }
+
+        .link-item.instagram:not(:hover) .icon-container svg { fill: var(--accent-color-instagram); }
+        .link-item.youtube:not(:hover) .icon-container svg { fill: var(--accent-color-youtube); }
+        .link-item.github:not(:hover) .icon-container svg { fill: var(--accent-color-github); }
+        
+        .link-item:hover .icon-container svg {
+            fill: var(--accent-color, currentColor);
+        }
+
+        .link-item .text-container {
+            flex-grow: 1;
+        }
+
+        .link-item .link-title {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            transition: color 0.3s ease;
+        }
+
+        .link-item .link-subtitle {
+            font-size: 0.88em;
+            color: #555;
+            margin: 0;
+        }
+
+        @keyframes springIn {
+            0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes iconWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="scroll-wrapper">
+        <div class="profile-container">
+            <img src="https://i.etsystatic.com/48593207/r/il/36ab8c/5754965886/il_fullxfull.5754965886_hu40.jpg" alt="Profile Picture" class="profile-pic" draggable="false">
+            <h1 class="profile-name">Monomixs</h1>
+        </div>
+
+        <div class="links-section">
+             <!-- Link items unchanged, make sure all img have draggable="false" -->
+            <a href="https://www.instagram.com/monomixs1?igsh=MXRiajQ2emM4dnUxZw==" class="link-item instagram" rel="noopener noreferrer" draggable="false">
+                <div class="icon-container">
+                    <svg width="64px" height="64px" viewBox="0 0 32.00 32.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#000000" stroke-width="0.00032" transform="rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint0_radial_87_7153)"></rect> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint1_radial_87_7153)"></rect> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint2_radial_87_7153)"></rect> <path d="M23 10.5C23 11.3284 22.3284 12 21.5 12C20.6716 12 20 11.3284 20 10.5C20 9.67157 20.6716 9 21.5 9C22.3284 9 23 9.67157 23 10.5Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21ZM16 19C17.6569 19 19 17.6569 19 16C19 14.3431 17.6569 13 16 13C14.3431 13 13 14.3431 13 16C13 17.6569 14.3431 19 16 19Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M6 15.6C6 12.2397 6 10.5595 6.65396 9.27606C7.2292 8.14708 8.14708 7.2292 9.27606 6.65396C10.5595 6 12.2397 6 15.6 6H16.4C19.7603 6 21.4405 6 22.7239 6.65396C23.8529 7.2292 24.7708 8.14708 25.346 9.27606C26 10.5595 26 12.2397 26 15.6V16.4C26 19.7603 26 21.4405 25.346 22.7239C24.7708 23.8529 23.8529 24.7708 22.7239 25.346C21.4405 26 19.7603 26 16.4 26H15.6C12.2397 26 10.5595 26 9.27606 25.346C8.14708 24.7708 7.2292 23.8529 6.65396 22.7239C6 21.4405 6 19.7603 6 16.4V15.6ZM15.6 8H16.4C18.1132 8 19.2777 8.00156 20.1779 8.0751C21.0548 8.14674 21.5032 8.27659 21.816 8.43597C22.5686 8.81947 23.1805 9.43139 23.564 10.184C23.7234 10.4968 23.8533 10.9452 23.9249 11.8221C23.9984 12.7223 24 13.8868 24 15.6V16.4C24 18.1132 23.9984 19.2777 23.9249 20.1779C23.8533 21.0548 23.7234 21.5032 23.564 21.816C23.1805 22.5686 22.5686 23.1805 21.816 23.564C21.5032 23.7234 21.0548 23.8533 20.1779 23.9249C19.2777 23.9984 18.1132 24 16.4 24H15.6C13.8868 24 12.7223 23.9984 11.8221 23.9249C10.9452 23.8533 10.4968 23.7234 10.184 23.564C9.43139 23.1805 8.81947 22.5686 8.43597 21.816C8.27659 21.5032 8.14674 21.0548 8.0751 20.1779C8.00156 19.2777 8 18.1132 8 16.4V15.6C8 13.8868 8.00156 12.7223 8.0751 11.8221C8.14674 10.9452 8.27659 10.4968 8.43597 10.184C8.81947 9.43139 9.43139 8.81947 10.184 8.43597C10.4968 8.27659 10.9452 8.14674 11.8221 8.0751C12.7223 8.00156 13.8868 8 15.6 8Z" fill="white"></path> <defs> <radialGradient id="paint0_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 23) rotate(-55.3758) scale(25.5196)"> <stop stop-color="#000000"></stop> <stop offset="0.79309" stop-color="#000000"></stop> <stop offset="1" stop-color="#000000"></stop> </radialGradient> <radialGradient id="paint1_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11 31) rotate(-65.1363) scale(22.5942)"> <stop stop-color="#000000"></stop> <stop offset="0.444662" stop-color="#000000"></stop> <stop offset="0.71474" stop-color="#000000"></stop> <stop offset="1" stop-color="#000000" stop-opacity="0"></stop> </radialGradient> <radialGradient id="paint2_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0.500002 3) rotate(-8.1301) scale(38.8909 8.31836)"> <stop offset="0.156701" stop-color="#000000"></stop> <stop offset="0.467799" stop-color="#000000"></stop> <stop offset="1" stop-color="#000000" stop-opacity="0"></stop> </radialGradient> </defs> </g></svg>
+                </div>
+                <div class="text-container">
+                    <h2 class="link-title">Instagram</h2>
+                    <p class="link-subtitle">Follow me on Instagram</p>
+                </div>
+            </a>
+
+            <a href="https://youtube.com/@monomixs" class="link-item youtube" rel="noopener noreferrer" draggable="false">
+                <div class="icon-container">
+                    <svg style="border-radius: 8px;" fill="#000000" height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-143 145 512 512" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <polygon points="78.9,450.3 162.7,401.1 78.9,351.9 "></polygon> <path d="M-143,145v512h512V145H-143z M241,446.8L241,446.8c0,44.1-44.1,44.1-44.1,44.1H29.1c-44.1,0-44.1-44.1-44.1-44.1v-91.5 c0-44.1,44.1-44.1,44.1-44.1h167.8c44.1,0,44.1,44.1,44.1,44.1V446.8z"></path> </g> </g></svg>
+                </div>
+                <div class="text-container">
+                    <h2 class="link-title">YouTube</h2>
+                    <p class="link-subtitle">Watch my videos</p>
+                </div>
+            </a>
+
+            <a href="https://www.threads.net/@monomixs1" class="link-item threads" rel="noopener noreferrer" draggable="false">
+                <div class="icon-container">
+                    <img src="https://picsvg.com/svg/GANxy501.svg?v=29894" alt="Threads Logo" draggable="false">
+                </div>
+                <div class="text-container">
+                    <h2 class="link-title">Threads</h2>
+                    <p class="link-subtitle">Join the conversation</p>
+                </div>
+            </a>
+
+            <a href="https://github.com/monomixs" class="link-item github" rel="noopener noreferrer" draggable="false">
+                <div class="icon-container">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.419 2.865 8.166 6.839 9.489.5.09.682-.218.682-.484 0-.238-.009-.868-.013-1.703-2.782.602-3.369-1.34-3.369-1.34-.455-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.004.071 1.532 1.03 1.532 1.03.891 1.529 2.341 1.089 2.91.833.091-.647.349-1.086.635-1.337-2.22-.252-4.555-1.112-4.555-4.947 0-1.092.39-1.985 1.03-2.685-.103-.254-.447-1.27.097-2.647 0 0 .84-.269 2.75 1.025A9.549 9.549 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.748-1.025 2.748-1.025.546 1.377.202 2.393.1 2.647.64.7 1.026 1.593 1.026 2.685 0 3.847-2.339 4.691-4.567 4.939.359.307.678.917.678 1.85 0 1.335-.012 2.415-.012 2.741 0 .269.18.579.688.481A10.004 10.004 0 0022 12c0-5.523-4.477-10-10-10z"></path></svg>
+                </div>
+                <div class="text-container">
+                    <h2 class="link-title">GitHub</h2>
+                    <p class="link-subtitle">Check out my code</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // --- Item Animations (No change) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const linkItemsAnimate = document.querySelectorAll('.link-item');
+            linkItemsAnimate.forEach((item, index) => {
+                item.style.animation = `springIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${0.4 + index * 0.12}s forwards`;
+            });
+            linkItemsAnimate.forEach(item => { /* ... your item tap/drag logic ... */ });
+        });
+
+
+        // --- Conditional Smooth Scroll Logic ---
+        const scrollWrapper = document.querySelector('.scroll-wrapper');
+        const htmlEl = document.documentElement;
+        const bodyEl = document.body;
+
+        let logicalScrollY = 0;
+        let visualScrollY = 0;
+        
+        let isPageTouching = false;
+        let isPageWheeling = false; // Specifically for touchpad/gesture wheel
+        let pageTouchStartY = 0;
+        let pageTouchLastY = 0;
+        let pageScrollRafId = null;
+        let wheelTimeoutId = null;
+
+        // --- Input Detection and System State ---
+        let detectedInputMethod = 'initial'; // 'initial', 'touch', 'touchpad', 'mouse'
+        let isCustomScrollSystemActive = false;
+
+        // --- Constants for smooth scroll ---
+        const LERP_FACTOR_SCROLL = 0.2;
+        const LERP_FACTOR_BOUNCE = 0.12;
+        const DAMPING_FACTOR = 0.4;
+        const MAX_OVERSCROLL_PX = 100;
+        const WHEEL_SENSITIVITY_CUSTOM = 0.8; // Sensitivity for custom scrolled wheel (touchpad)
+        const PAGE_SCROLL_INIT_THRESHOLD = 5;
+        const TOUCHPAD_PIXEL_DELTA_THRESHOLD = 30; // If pixel deltaY is less than this, likely touchpad
+
+        let pageScrollStartedForThisTouch = false;
+
+        function lerp(start, end, amount) {
+            return (1 - amount) * start + amount * end;
+        }
+
+        function activateCustomScroll() {
+            if (isCustomScrollSystemActive) return;
+            // console.log("Activating Custom Scroll for:", detectedInputMethod);
+            isCustomScrollSystemActive = true;
+            htmlEl.style.overflow = 'hidden';
+            bodyEl.style.overflow = 'hidden';
+            // Ensure logical scroll is consistent if switching from native
+            // This assumes custom scroll starts from current native position (usually 0 if just activated)
+            // visualScrollY = window.scrollY || document.documentElement.scrollTop; // If there was native scroll
+            // logicalScrollY = visualScrollY;
+            startRafLoop();
+        }
+
+        function deactivateCustomScroll() {
+            if (!isCustomScrollSystemActive) return;
+            // console.log("Deactivating Custom Scroll, using native for:", detectedInputMethod);
+            isCustomScrollSystemActive = false;
+            htmlEl.style.overflow = ''; // Revert to browser default
+            bodyEl.style.overflow = ''; // Revert to browser default
+            if (pageScrollRafId) {
+                cancelAnimationFrame(pageScrollRafId);
+                pageScrollRafId = null;
+            }
+             // Reset scrollWrapper's transform when switching to native
+             // to avoid visual glitches from prior custom scroll.
+             scrollWrapper.style.transform = 'translateY(0px)';
+             logicalScrollY = 0; // window.scrollY or document.documentElement.scrollTop when native scroll active
+             visualScrollY = 0;
+        }
+
+        function startRafLoop() {
+            if (!isCustomScrollSystemActive || pageScrollRafId) return;
+            scrollWrapper.style.transition = 'none';
+            pageScrollRafId = requestAnimationFrame(updatePageScrollAnimation);
+        }
+
+        function updatePageScrollAnimation() {
+            if (!isCustomScrollSystemActive) { // Should not run if custom scroll is off
+                pageScrollRafId = null;
+                return;
+            }
+
+            const contentHeight = scrollWrapper.scrollHeight;
+            const viewportHeight = window.innerHeight;
+            
+            const minPossibleTranslateY = (contentHeight <= viewportHeight) ? 0 : -(contentHeight - viewportHeight);
+            const maxPossibleTranslateY = 0;
+
+            let targetVisualForFrame = logicalScrollY;
+
+            if (!isPageTouching && !isPageWheeling) { // Bounce back if not actively interacting
+                if (logicalScrollY > maxPossibleTranslateY) {
+                    logicalScrollY = lerp(logicalScrollY, maxPossibleTranslateY, LERP_FACTOR_BOUNCE);
+                    targetVisualForFrame = logicalScrollY;
+                } else if (logicalScrollY < minPossibleTranslateY) {
+                    logicalScrollY = lerp(logicalScrollY, minPossibleTranslateY, LERP_FACTOR_BOUNCE);
+                    targetVisualForFrame = logicalScrollY;
+                }
+            } else { // Rubber banding during active interaction
+                if (logicalScrollY > maxPossibleTranslateY) {
+                    targetVisualForFrame = maxPossibleTranslateY + Math.min((logicalScrollY - maxPossibleTranslateY) * DAMPING_FACTOR, MAX_OVERSCROLL_PX);
+                } else if (logicalScrollY < minPossibleTranslateY) {
+                    targetVisualForFrame = minPossibleTranslateY - Math.min((minPossibleTranslateY - logicalScrollY) * DAMPING_FACTOR, MAX_OVERSCROLL_PX);
+                }
+            }
+            
+            visualScrollY = lerp(visualScrollY, targetVisualForFrame, LERP_FACTOR_SCROLL);
+
+            if (Math.abs(visualScrollY - targetVisualForFrame) < 0.1) {
+                visualScrollY = targetVisualForFrame;
+            }
+            
+            scrollWrapper.style.transform = `translateY(${visualScrollY}px)`;
+
+            const isStillMovingLogically = Math.abs(logicalScrollY - ( (logicalScrollY > maxPossibleTranslateY) ? maxPossibleTranslateY : (logicalScrollY < minPossibleTranslateY ? minPossibleTranslateY : logicalScrollY) ) ) > 0.1;
+            const isStillMovingVisually = Math.abs(visualScrollY - targetVisualForFrame) > 0.1;
+
+            if (isPageTouching || isPageWheeling || isStillMovingLogically || isStillMovingVisually) {
+                pageScrollRafId = requestAnimationFrame(updatePageScrollAnimation);
+            } else {
+                visualScrollY = (logicalScrollY > maxPossibleTranslateY) ? maxPossibleTranslateY : (logicalScrollY < minPossibleTranslateY ? minPossibleTranslateY : logicalScrollY);
+                if (visualScrollY > maxPossibleTranslateY) visualScrollY = maxPossibleTranslateY;
+                if (visualScrollY < minPossibleTranslateY) visualScrollY = minPossibleTranslateY;
+                logicalScrollY = visualScrollY;
+
+                scrollWrapper.style.transform = `translateY(${visualScrollY}px)`;
+                pageScrollRafId = null;
+            }
+        }
+
+        // --- Touch Listeners (Primarily for activating custom scroll on phones) ---
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) return;
+
+            // This is a touch event, so it's a touch device (phone or tablet)
+            detectedInputMethod = 'touch';
+            if (!isCustomScrollSystemActive) {
+                activateCustomScroll();
+            }
+
+            isPageTouching = true;
+            pageScrollStartedForThisTouch = false;
+            pageTouchStartY = e.touches[0].clientY;
+            pageTouchLastY = e.touches[0].clientY;
+            
+            if (isCustomScrollSystemActive) {
+                scrollWrapper.style.transition = 'none';
+                startRafLoop();
+            }
+        }, { passive: true }); // `passive:true` initially. `touchmove` will handle `preventDefault`
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isPageTouching || e.touches.length > 1 || !isCustomScrollSystemActive) return;
+
+            const currentTouchY = e.touches[0].clientY;
+
+            if (!pageScrollStartedForThisTouch) {
+                const deltaFromStart = Math.abs(currentTouchY - pageTouchStartY);
+                if (deltaFromStart > PAGE_SCROLL_INIT_THRESHOLD) {
+                    pageScrollStartedForThisTouch = true;
+                    pageTouchLastY = currentTouchY - (currentTouchY - pageTouchLastY) * (PAGE_SCROLL_INIT_THRESHOLD / deltaFromStart);
+                } else {
+                    return; 
+                }
+            }
+            
+            e.preventDefault(); // Only preventDefault if custom scroll is active and threshold met
+
+            const deltaY = currentTouchY - pageTouchLastY;
+            logicalScrollY += deltaY;
+            pageTouchLastY = currentTouchY;
+
+            startRafLoop();
+        }, { passive: false }); // Must be `false` for `preventDefault`
+
+        document.addEventListener('touchend', (e) => {
+            if (!isPageTouching) return;
+            isPageTouching = false;
+            pageScrollStartedForThisTouch = false;
+            if (isCustomScrollSystemActive) {
+                startRafLoop();
+            }
+        });
+
+        document.addEventListener('touchcancel', (e) => {
+            if (!isPageTouching) return;
+            isPageTouching = false;
+            pageScrollStartedForThisTouch = false;
+            if (isCustomScrollSystemActive) {
+                startRafLoop();
+            }
+        });
+
+        // --- Mouse Wheel Listener (Differentiates mouse from touchpad) ---
+        document.addEventListener('wheel', (e) => {
+            // Heuristics for differentiating touchpad/precision mouse from traditional mouse wheel
+            const isGestureLikeWheel = e.ctrlKey; // Often pinch-zoom
+            const isFractionalDelta = (e.deltaY % 1 !== 0) && e.deltaY !== 0;
+            const isPixelModeSmallDelta = e.deltaMode === 0 && Math.abs(e.deltaY) > 0 && Math.abs(e.deltaY) < TOUCHPAD_PIXEL_DELTA_THRESHOLD;
+
+            let wheelIntent = 'mouse'; // Default assumption for this wheel event
+            if (detectedInputMethod === 'touch') { // If already known as touch, keep custom scroll for co-firing wheel
+                 wheelIntent = 'touch';
+            } else if (isGestureLikeWheel || isFractionalDelta || isPixelModeSmallDelta) {
+                wheelIntent = 'touchpad';
+            }
+            // else it remains 'mouse'
+
+            // Update the global detectedInputMethod only if it's not already 'touch'
+            // This means once 'touch' is detected, wheel events won't change it to 'mouse' or 'touchpad'
+            if (detectedInputMethod !== 'touch') {
+                 detectedInputMethod = wheelIntent;
+            }
+
+
+            if (detectedInputMethod === 'touch' || detectedInputMethod === 'touchpad') {
+                if (!isCustomScrollSystemActive) {
+                    activateCustomScroll();
+                }
+                e.preventDefault(); // Prevent native scroll for touchpad/gesture custom scroll
+                isPageWheeling = true;
+                logicalScrollY -= e.deltaY * WHEEL_SENSITIVITY_CUSTOM;
+
+                clearTimeout(wheelTimeoutId);
+                wheelTimeoutId = setTimeout(() => {
+                    isPageWheeling = false;
+                    if (isCustomScrollSystemActive) startRafLoop();
+                }, 150);
+
+                if (isCustomScrollSystemActive) startRafLoop();
+
+            } else { // detectedInputMethod === 'mouse' (or 'initial' which defaults to mouse behavior here)
+                if (isCustomScrollSystemActive) {
+                    deactivateCustomScroll(); // Switch to native browser scroll
+                }
+                // Do nothing more; let the browser handle the native scroll.
+                // No preventDefault(), no custom logic updates.
+                return;
+            }
+        }, { passive: false }); // `passive:false` as we might `preventDefault`
+        
+        // --- Recalculate on resize/load ---
+        function onResizeOrLoad() {
+            if (isCustomScrollSystemActive) {
+                const contentHeight = scrollWrapper.scrollHeight;
+                const viewportHeight = window.innerHeight;
+                const minPossibleTranslateY = (contentHeight <= viewportHeight) ? 0 : -(contentHeight - viewportHeight);
+                const maxPossibleTranslateY = 0;
+
+                if (logicalScrollY > maxPossibleTranslateY) logicalScrollY = maxPossibleTranslateY;
+                if (logicalScrollY < minPossibleTranslateY) logicalScrollY = minPossibleTranslateY;
+                
+                visualScrollY = logicalScrollY;
+                scrollWrapper.style.transform = `translateY(${visualScrollY}px)`;
+                startRafLoop();
+            } else {
+                // If native scroll is active, no custom adjustments needed here.
+            }
+        }
+        window.addEventListener('resize', onResizeOrLoad);
+        window.addEventListener('load', () => {
+            onResizeOrLoad();
+            // Ensure correct initial state if no interaction has happened yet
+            if(detectedInputMethod === 'initial' && !isCustomScrollSystemActive) {
+                 // This implies native scroll is active, which is the default state.
+                 // If you wanted custom scroll to be default if possible:
+                 // if (!('ontouchstart' in window)) { /* maybe try initial touchpad detect */}
+            }
+        });
+
+    </script>
+
+</body>
+</html>
